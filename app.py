@@ -6,6 +6,7 @@ import yfinance as yf
 import pandas as pd
 
 TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "JPM", "V", "JNJ"]
+DB_PATH = "data/stocks.db"
 
 def bootstrap_db():
     os.makedirs("data", exist_ok=True)
@@ -27,8 +28,6 @@ def bootstrap_db():
 if not os.path.exists(DB_PATH):
     with st.spinner("Fetching stock data for the first time..."):
         bootstrap_db()
-
-DB_PATH = "data/stocks.db"
 
 st.set_page_config(page_title="Stock Screener", layout="wide")
 st.title("📈 Stock Screener")
