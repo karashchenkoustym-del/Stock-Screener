@@ -1,6 +1,32 @@
 import streamlit as st
 import duckdb
 import plotly.graph_objects as go
+import os
+import yfinance as yf
+import pandas as pd
+
+TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "META", "TSLA", "JPM", "V", "JNJ"]
+
+def bootstrap_db():
+    os.makedirs("data", exist_ok=True)
+    con = duckdb.connect(DB_PATH)
+    all_data = []
+    for ticker in TICKERS:
+        df = yf.download(ticker, period="6mo", auto_adjust=True, progress=False)
+        df.columns = [col[0].lower() if isinstance(col, tuple) else col.lower() for col in df.columns]
+        df["ticker"] = ticker
+        df.reset_index(inplace=True)
+        df.rename(columns={"date": "date"}, inplace=True)
+        all_data.append(df)
+    combined = pd.concat(all_data, ignore_index=True)
+    con.execute("DROP TABLE IF EXISTS ohlcv")
+    con.execute("CREATE TABLE ohlcv AS SELECT * FROM combined")
+    con.execute(open("scripts/indicators.sql").read())
+    con.close()
+
+if not os.path.exists(DB_PATH):
+    with st.spinner("Fetching stock data for the first time..."):
+        bootstrap_db()
 
 DB_PATH = "data/stocks.db"
 
