@@ -17,7 +17,7 @@ def bootstrap_db():
         df.columns = [col[0].lower() if isinstance(col, tuple) else col.lower() for col in df.columns]
         df["ticker"] = ticker
         df.reset_index(inplace=True)
-        df.rename(columns={"date": "date"}, inplace=True)
+        df.columns = [c.lower() for c in df.columns]  # lowercase Date → date
         all_data.append(df)
     combined = pd.concat(all_data, ignore_index=True)
     con.execute("DROP TABLE IF EXISTS ohlcv")
